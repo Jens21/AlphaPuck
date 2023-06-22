@@ -1,0 +1,50 @@
+import laserhockey.hockey_env as h_env
+from torch.utils.tensorboard import SummaryWriter
+
+from src_jens.example.example_agent import example_agent
+
+import numpy as np
+np.random.seed(12345)
+
+ROUNDS = 10
+MAX_STEPS = 5_000
+RENDER = False
+
+player1 = example_agent() # change to your agent
+player2 = h_env.BasicOpponent(weak=True)
+
+if __name__ == '__main__':
+    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.NORMAL)
+    writer = SummaryWriter()
+
+    l_winners = []
+    for round_idx in range(ROUNDS):
+        env.seed(seed=np.random.randint(0, 1e8))
+        obs_agent_1, _ = env.reset()
+        obs_agent_2 = env.obs_agent_two()
+
+        for step_idx in range(MAX_STEPS):
+            if RENDER: env.render()
+
+            a1 = player1.act(obs_agent_1, evaluation=True)
+            a2 = player2.act(obs_agent_2, evaluation=True)
+            obs_agent_1, reward, done, _, info = env.step(np.hstack([a1,a2]))
+            obs_agent_2 = env.obs_agent_two()
+
+            if done or step_idx == MAX_STEPS-1:
+                print('Winner: {}'.format('player 1' if info['winner']==1 else 'player 2'))
+                writer.add_scalar('Winner', info['winner'], round_idx)
+                l_winners.append(info['winner'])
+                break
+
+    l_winners = np.array(l_winners)
+    n_left_won = (l_winners == 1).sum()
+    n_right_won = (l_winners == -1).sum()
+    n_draws = (l_winners == 0).sum()
+
+    print('\nLeft player won: {}/{} ({:.2f}%)'.format(n_left_won, len(l_winners), 100*n_left_won/len(l_winners)))
+    print('Right player won: {}/{} ({:.2f}%)'.format(n_right_won, len(l_winners), 100*n_right_won/len(l_winners)))
+    print('Draws: {}/{} ({:.2f}%)'.format(n_draws, len(l_winners), 100*n_draws/len(l_winners)))
+
+    env.close()
+    writer.close()
