@@ -1,4 +1,5 @@
 #For amd64 (Windows, Ubuntu): sudo singularity build singularity_rl.simg singularity_rl
+# Execute with singularity exec ../../singularity_rl.simg python main_training.py
 #header
 Bootstrap: docker
 From: nvidia/cuda:11.3.1-base-ubuntu20.04
