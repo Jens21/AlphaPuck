@@ -1,0 +1,3 @@
+[submodule "src_fabrice"]
+	path = src_fabrice
+	url = git@github.com:f-lair/alpha-puck.git
