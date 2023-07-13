@@ -1,0 +1,47 @@
+#For amd64 (Windows, Ubuntu): sudo singularity build singularity_rl_3_10.simg singularity_rl_3_10
+# Execute with singularity exec ../../singularity_rl_3_10.simg python main_training.py
+#header
+Bootstrap: docker
+From: nvidia/cuda:11.3.1-base-ubuntu20.04
+
+#Sections
+
+%help
+Singularity image for the rl final project.
+OS: Ubuntu 20.04
+Cuda: 11.3.1
+Python: 3.10.12
+
+%labels
+# information labels about the container  saved in /.singularity.d/labels.json
+  Version v0.1
+# overwrite  True= to be able to build it multiple times
+  overwrite False
+  python.version 3.10.12
+
+%environment
+# set environment variables
+
+# cf. https://stackoverflow.com/a/76170605, https://github.com/python-poetry/poetry/issues/5557
+%post
+export DEBIAN_FRONTEND=noninteractive
+apt update -y
+apt-get update
+apt-get install -y build-essential
+apt install -y software-properties-common
+add-apt-repository -y ppa:deadsnakes/ppa
+apt install -y python3.10 python3.10-dev python3.10-tk curl
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+ln -fs /usr/bin/python3.10 /usr/bin/python
+apt install -y swig
+apt-get install zip unzip
+apt-get install git-all -y
+
+python3.10 -m pip install gymnasium
+python3.10 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git
+python3.10 -m pip install numpy
+python3.10 -m pip install matplotlib
+python3.10 -m pip install torchvision
+python3.10 -m pip install scipy
+python3.10 -m pip install tensorboard
+python3.10 -m pip install tqdm
