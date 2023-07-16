@@ -42,6 +42,7 @@ python3.10 -m pip install git+https://github.com/martius-lab/laser-hockey-env.gi
 python3.10 -m pip install numpy
 python3.10 -m pip install matplotlib
 python3.10 -m pip install torchvision
+python3.10 -m pip install torch-scatter -f https://data.pyg.org/whl/torch-2.0.0+cpu.html
 python3.10 -m pip install scipy
 python3.10 -m pip install tensorboard
 python3.10 -m pip install tqdm
