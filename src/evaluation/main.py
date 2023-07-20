@@ -5,6 +5,7 @@ import laserhockey.hockey_env as h_env
 import numpy as np
 import torch
 from agents.agent import Agent
+from agents.decqn_fabrice import DecQN_Fabrice
 from agents.dueling_jens import Dueling_Jens
 from tqdm import trange
 
@@ -27,8 +28,7 @@ def get_agent_from_player(player: str) -> Agent | h_env.BasicOpponent:
     if player == "Jens":
         return Dueling_Jens()
     elif player == "Fabrice":
-        # TODO
-        raise NotImplementedError
+        return DecQN_Fabrice()
     elif player == "Christoph":
         # TODO
         raise NotImplementedError
@@ -58,7 +58,7 @@ def main() -> None:
         help="Name of player 1: Jens, Fabrice, Christoph, Weak, Strong.",
     )
     main_parser.add_argument(
-        "--num-eval-episodes",
+        "--num-episodes",
         type=int,
         default=100,
         help="Number of evaluation episodes.",
@@ -109,7 +109,7 @@ def main() -> None:
             if not args.disable_rendering:
                 env.render()
 
-            action_c_p1, _ = agent_p1.act(state_p1)
+            action_c_p1 = agent_p1.act(state_p1)
             action_c_p2 = agent_p2.act(state_p2)
 
             state_p1, _, terminal, _, info = env.step(np.hstack([action_c_p1, action_c_p2]))

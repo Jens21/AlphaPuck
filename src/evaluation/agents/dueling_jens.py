@@ -1,26 +1,23 @@
-from agents.agent import Agent
-
 import numpy as np
 import torch as th
+from agents.agent import Agent
 
 ACTIONS = [
     np.array([1, 0, 0, 1]),
     np.array([-1, 0, 0, 1]),
     np.array([0, 1, 0, 1]),
     np.array([0, -1, 0, 1]),
-
     np.array([1, 0, 1, 1]),
     np.array([-1, 0, 1, 1]),
     np.array([0, 1, 1, 1]),
     np.array([0, -1, 1, 1]),
-
     np.array([1, 0, -1, 1]),
     np.array([-1, 0, -1, 1]),
     np.array([0, 1, -1, 1]),
     np.array([0, -1, -1, 1]),
-
     np.array([0, 0, 0, 1]),
 ]
+
 
 class Network(th.nn.Module):
     def __init__(self):
@@ -30,11 +27,13 @@ class Network(th.nn.Module):
             th.nn.ReLU(),
             th.nn.Linear(128, 64),
             th.nn.ReLU(),
-            th.nn.Linear(64, len(ACTIONS)+1),
+            th.nn.Linear(64, len(ACTIONS) + 1),
         )
 
         self.mean = th.FloatTensor([[-2.07, 0, 0, 0, 0, 0, 2.07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-        self.std = th.FloatTensor([[1.57, 2.91, 1.04, 4, 4, 6, 1.57, 2.91, 1.04, 4, 4, 6, 3.7, 3, 12, 12, 15, 15]])
+        self.std = th.FloatTensor(
+            [[1.57, 2.91, 1.04, 4, 4, 6, 1.57, 2.91, 1.04, 4, 4, 6, 3.7, 3, 12, 12, 15, 15]]
+        )
 
     def forward(self, x):
         x = (x - self.mean) / self.std
@@ -47,9 +46,11 @@ class Network(th.nn.Module):
 
         return q_values
 
+
 class Dueling_Jens(Agent):
     def __init__(self):
-        self.net = th.load('agents/dueling_jens.pth').eval()
+        self.net = Network()
+        self.net.load_state_dict(th.load('agents/dueling_jens.pth'))
 
     def act(self, obs):
         with th.no_grad():
