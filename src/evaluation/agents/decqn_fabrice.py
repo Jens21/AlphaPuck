@@ -40,7 +40,9 @@ class DecQN_Fabrice(Agent):
             device,
         )
         q_model.load(CHECKPOINT)
-        self.agent = DecQNAgent(q_model, DISCRETIZATION_DIM, MAX_ABS_FORCE, MAX_ABS_TORQUE, device)
+        self.agent = DecQNAgent(
+            "DecQN", q_model, DISCRETIZATION_DIM, MAX_ABS_FORCE, MAX_ABS_TORQUE, device
+        )
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """
