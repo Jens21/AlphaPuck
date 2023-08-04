@@ -81,9 +81,9 @@ def set_seed(env, seed_value):
 
 if __name__=='__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_mode = True
+    train_mode = False
 
-    env = gymnasium.make("LunarLander-v2")
+    env = gymnasium.make("LunarLander-v2", render_mode="human")
     model_filename = "ll_online_net"
 
     if train_mode:
