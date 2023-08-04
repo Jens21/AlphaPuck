@@ -3,14 +3,14 @@ import torch
 
 class DuelingDQN(torch.nn.Module):
 
-    def __init__(self, observation_dim, action_dim):
+    def __init__(self, observation_dim, action_dim, lr=1e-3):
         super(DuelingDQN, self).__init__()
         self.observation_dim = observation_dim
         self.action_dim = action_dim
 
         # Replacement for the convolutional network to scale up to 512 nodes. Possibly add aditional layer with 256 nodes.
         self.conv_replacement = torch.nn.Sequential(
-            torch.nn.Linear(observation_dim, 512),
+            torch.nn.Linear(self.observation_dim, 512),
             torch.nn.ReLU()
         )
 
@@ -24,8 +24,12 @@ class DuelingDQN(torch.nn.Module):
         self.adv_stream = torch.nn.Sequential(
             torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
-            torch.nn.Linear(512, action_dim)
+            torch.nn.Linear(512, self.action_dim)
         )
+
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        #self.double()
+
 
     def forward(self, state):
 
