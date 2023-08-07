@@ -49,3 +49,19 @@ class ReplayBuffer():
     def __len__(self):
         return len(self.states)
     
+
+
+class PrioritizedReplayBuffer():
+
+    def __init__(self):
+        pass
+
+    def push():
+        pass
+
+    def sample():
+        pass
+
+    def __len__(self):
+        return len(self.states)
+    

@@ -10,7 +10,12 @@ class DuelingDQN(torch.nn.Module):
 
         # Replacement for the convolutional network to scale up to 512 nodes. Possibly add aditional layer with 256 nodes.
         self.conv_replacement = torch.nn.Sequential(
-            torch.nn.Linear(self.observation_dim, 128),
+            #torch.nn.Linear(self.observation_dim, 128),
+            #torch.nn.ReLU(),
+            # new for another test
+            torch.nn.Linear(self.observation_dim, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 128),
             torch.nn.ReLU()
         )
 
@@ -28,7 +33,7 @@ class DuelingDQN(torch.nn.Module):
         )
 
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
-        #self.double()
+
 
 
     def forward(self, state):
