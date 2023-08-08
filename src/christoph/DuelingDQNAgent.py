@@ -102,8 +102,7 @@ class DuelingDQNAgent():
         
 
         predict_qs = self.policy_net(states)
-        # for lunar lander
-        #predict_qs = predict_qs.gather(1, actions.type(torch.int64))
+
         predict_qs = predict_qs.gather(1, actions.type(torch.int64))
 
         loss = torch.nn.functional.mse_loss(predict_qs, target)

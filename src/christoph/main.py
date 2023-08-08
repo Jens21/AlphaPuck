@@ -13,7 +13,7 @@ from actions import ACTIONS
 
 from DuelingDQNAgent import DuelingDQNAgent
 
-def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_freq, model_filename, weak_oponent):
+def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_freq, model_filename, weak_opponent, shuffle_opponent):
     fill_buffer(env, agent, buffer_fill_episodes)
     print("Samples in buffer: ", len(agent.replay_buffer))
 
@@ -27,18 +27,29 @@ def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_fr
 
 
     for ep_count in range(train_episodes):
-        state = env.reset()
+        state, _ = env.reset()
         bot_state = env.obs_agent_two()
         done = False
         ep_reward = 0
         frames = 0
 
-        bot = h_env.BasicOpponent(weak=weak_oponent)
+        if shuffle_opponent:
+            if ep_count % 2 == 0:
+                bot = h_env.BasicOpponent(weak=False)
+            else:                 
+                bot = h_env.BasicOpponent(weak=weak_opponent)
+        else:
+            bot = h_env.BasicOpponent(weak=weak_opponent)
 
         while not done and frames < 1200:
             action, action_idx = agent.select_action(state)
-            bot_action = bot.act(bot_state)
-            next_state, reward, done, _, info = env.step(np.hstack([action, bot_action]))
+
+
+            for _ in range(4):
+                bot_action = bot.act(bot_state)
+                next_state, r, done, _, info = env.step(np.hstack([action, bot_action]))
+                if done:
+                    break
 
             #calculate new reward
             reward_touch_puck = info["reward_touch_puck"]
@@ -52,8 +63,6 @@ def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_fr
                 winner_reward = -10
             if winner == 1:
                 winner_reward = 10
-
-
 
             reward = reward_touch_puck + reward_puck_direction + winner_reward + 0.25 * reward_closeness_to_puck
 
@@ -71,7 +80,7 @@ def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_fr
             frames += 1
 
         
-        if ep_count % 2 == 0:
+        if ep_count % 4 == 0:
             agent.update_epsilon()
         reward_history.append(ep_reward)
 
@@ -93,7 +102,7 @@ def train(env, agent, train_episodes, buffer_fill_episodes, batchsize, update_fr
 
 def fill_buffer(env, agent, buffer_fill_episodes):
     for _ in range(buffer_fill_episodes):
-        state = env.reset()        
+        state, _ = env.reset()        
         bot_state = env.obs_agent_two()
         done = False
 
@@ -103,29 +112,51 @@ def fill_buffer(env, agent, buffer_fill_episodes):
             action, action_idx = agent.select_action(state)
             bot_action = bot.act(bot_state)
             next_state, reward, done, _, info = env.step(np.hstack([action, bot_action]))
+
+            #calculate new reward
+            reward_touch_puck = info["reward_touch_puck"]
+            reward_puck_direction = info["reward_puck_direction"]
+            reward_closeness_to_puck = info["reward_closeness_to_puck"]
+
+            #winner info, could add to reward
+            winner = info["winner"]
+            winner_reward = 0
+            if winner == -1:
+                winner_reward = -10
+            if winner == 1:
+                winner_reward = 10
+
+            reward = reward_touch_puck + reward_puck_direction + winner_reward + 0.25 * reward_closeness_to_puck
+
             agent.replay_buffer.push(state, action_idx, reward, next_state, done)
             bot_state = env.obs_agent_two()
             state=next_state
 
 
-def test(env, agent, test_episodes):
+def test(env, agent, test_episodes, weak):
     
     overall_reward = 0
 
+    wins = 0
+    losses = 0
+    draws = 0
+
+
     for ep_count in range(test_episodes):
-        state = env.reset()
+        state, _ = env.reset()
         bot_state = env.obs_agent_two()
 
-        _ = env.render()
+        #_ = env.render()
 
         done = False
         ep_reward = 0
         frames = 0
         
-        bot = h_env.BasicOpponent(weak=True)
+        bot = h_env.BasicOpponent(weak=weak)
+
 
         while not done and frames < 1200:
-            env.render()
+            #env.render()
 
             bot_action = bot.act(bot_state)
             action, action_idx = agent.select_action(state)
@@ -135,10 +166,20 @@ def test(env, agent, test_episodes):
             ep_reward += reward
             frames += 1
 
+            if done:
+                if info["winner"] == -1:
+                    losses += 1
+                elif info["winner"] == 0:
+                    draws += 1
+                else:
+                    wins += 1
+
+
         
         overall_reward += ep_reward
         print('Ep: {}, Ep score: {}'.format(ep_count, ep_reward))
     print("Final average reward: {}".format((overall_reward/test_episodes)))
+    print("Wins: {} Losses: {} Draws: {}".format(wins, losses, draws))
 
 
 def set_seed(env, seed_value):
@@ -158,7 +199,7 @@ if __name__=='__main__':
     # lunar lander without visualization
     #env = gymnasium.make("LunarLander-v2")
 
-    env = h_env.HockeyEnv(mode=h_env.HockeyEnv.TRAIN_SHOOTING)
+    env = h_env.HockeyEnv()
 
     # lunar lander
     #observation_dim = env.observation_space,
@@ -168,9 +209,10 @@ if __name__=='__main__':
     observation_dim = 18
     action_dim = len(ACTIONS)
     difficulty_weak = True
+    shuffle_opponent = True
 
 
-    model_filename = "normal_training_nn_first"
+    model_filename = "final_shuffle_training_nn_first"
 
     if train_mode:
         
@@ -180,21 +222,21 @@ if __name__=='__main__':
             agent = DuelingDQNAgent(observation_dim=observation_dim,
                                     action_dim=action_dim,
                                     device=device,
-                                    epsilon_max=1.0,
+                                    epsilon_max=0.1,
                                     epsilon_min=0.01,
                                     epsilon_decay=0.995,
                                     buffer_max_size=20000,
                                     discount=0.99,
-                                    lr=1e-3,
+                                    lr=1e-4,
                                     double=True)
             agent.load_network(model_filename)
-            model_filename = "normal_training"
+            model_filename = "final_shuffle_training_nn_first"
         else:
             agent = DuelingDQNAgent(observation_dim=observation_dim,
                                     action_dim=action_dim,
                                     device=device,
                                     epsilon_max=1.0,
-                                    epsilon_min=0.01,
+                                    epsilon_min=0.05,
                                     epsilon_decay=0.995,
                                     buffer_max_size=20000,
                                     discount=0.99,
@@ -204,12 +246,13 @@ if __name__=='__main__':
         
         train(env=env,
               agent=agent,
-              train_episodes=4000,
+              train_episodes=40000,
               buffer_fill_episodes=40,
               batchsize=128,
               update_freq=1000,
               model_filename=model_filename,
-              weak_oponent=difficulty_weak)
+              weak_opponent=difficulty_weak,
+              shuffle_opponent = shuffle_opponent)
         
     else:
         set_seed(env, 10)
@@ -227,4 +270,4 @@ if __name__=='__main__':
         
         agent.load_network(model_filename)
 
-        test(env=env, agent=agent, test_episodes=100)
+        test(env=env, agent=agent, test_episodes=100, weak=difficulty_weak)
