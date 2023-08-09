@@ -8,24 +8,22 @@ class DuelingDQN(torch.nn.Module):
         self.observation_dim = observation_dim
         self.action_dim = action_dim
 
-        # Replacement for the convolutional network to scale up to 512 nodes. Possibly add aditional layer with 256 nodes.
+        # Replacement for the convolutional network
         self.conv_replacement = torch.nn.Sequential(
-            #torch.nn.Linear(self.observation_dim, 128),
-            #torch.nn.ReLU(),
-            # new for another test
             torch.nn.Linear(self.observation_dim, 64),
             torch.nn.ReLU(),
             torch.nn.Linear(64, 128),
             torch.nn.ReLU()
         )
 
-
+        # Value stream of the dueling network
         self.val_stream = torch.nn.Sequential(
             torch.nn.Linear(128, 128),
             torch.nn.ReLU(),
             torch.nn.Linear(128, 1)
         )
 
+        # Advantage stream of the dueling network
         self.adv_stream = torch.nn.Sequential(
             torch.nn.Linear(128, 128),
             torch.nn.ReLU(),
@@ -42,6 +40,7 @@ class DuelingDQN(torch.nn.Module):
         val = self.val_stream(input)
         adv = self.adv_stream(input)
 
+        # combine the value and the advantage stream to receive the q value
         q = val + (adv - torch.mean(adv))
 
         return q

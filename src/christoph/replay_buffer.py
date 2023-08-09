@@ -2,6 +2,7 @@ import random
 import torch
 import numpy as np
 
+# Standard replay buffer to store the different state tuples
 class ReplayBuffer():
 
     def __init__(self, max_size):
@@ -13,6 +14,7 @@ class ReplayBuffer():
         self.dones = []
         self.idx = 0
 
+    # Function to add a tuple to the buffer
     def push(self, state, action, reward, next_state, done):
 
         if type(state) != np.ndarray:
@@ -20,6 +22,8 @@ class ReplayBuffer():
         if type(next_state) != np.ndarray:
             next_state = np.array(next_state[0])
 
+        # While the buffer is not full, the tuples are simply add to the corresponding array.
+        # If it is full, the oldest element in the buffer is replaced.
         if len(self.states) < self.max_size:
             self.states.append(state)
             self.actions.append(action)
@@ -35,6 +39,7 @@ class ReplayBuffer():
 
         self.idx = (self.idx + 1) % self.max_size
 
+    # Function to return batch_size many tuples from the buffer
     def sample(self, batch_size, device):
         idx_to_sample = random.sample(range(len(self.states)), k=batch_size)
 
@@ -50,18 +55,4 @@ class ReplayBuffer():
         return len(self.states)
     
 
-
-class PrioritizedReplayBuffer():
-
-    def __init__(self):
-        pass
-
-    def push():
-        pass
-
-    def sample():
-        pass
-
-    def __len__(self):
-        return len(self.states)
     

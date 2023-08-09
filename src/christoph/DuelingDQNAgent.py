@@ -36,10 +36,12 @@ class DuelingDQNAgent():
         self.update_target_net()
 
 
-
+    # Function to select and action
     def select_action(self, state):
         rn = random.random()
 
+        # If the random number is smaller than epsilon, a random action is executed.
+        # Otherwise the policy net is used to select an action
         if rn < self.epsilon:
             # for lunar lander
             #return random.randint(0, self.action_dim.n - 1)
@@ -48,6 +50,7 @@ class DuelingDQNAgent():
             idx = random.randint(0, self.action_dim - 1)
             return ACTIONS[random.randint(0, self.action_dim - 1)], idx
         
+        # Turn the state into an tensor in case a np.array (or sth else) was given
         if not torch.is_tensor(state):
             if type(state) == tuple:
                 state = np.array(state[0])
@@ -62,12 +65,16 @@ class DuelingDQNAgent():
         # for hockey
         return ACTIONS[action.item()], action.item()
         
+    # Function to update the epsilon value for exploring
     def update_epsilon(self):
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
 
+    # Function to update the target net with the policy net
     def update_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
+    # main function to train the network.
+    # Takes batchsize many elements from the replay buffer and then trains on them
     def learn(self, batchsize):
         if len(self.replay_buffer) < batchsize:
             return
@@ -80,7 +87,7 @@ class DuelingDQNAgent():
         
 
 
-         
+        # if self.double is true, double q learning is used to train the network.
         with torch.no_grad():
             if self.double:
                 policy_target_qs = self.policy_net(next_states)
@@ -110,7 +117,11 @@ class DuelingDQNAgent():
         loss.backward()
         self.policy_net.optimizer.step()
 
+    # save the network to the given directory in filename
     def save_network(self, filename):
+        
+        # when the system tried to save the agent multiple times after one another, the saving sometimes crashed.
+        # Therefore a try catch clause was added with a sleep timer in case the first one failed.
         try:
             print("saving network")
             torch.save(self.policy_net.state_dict(), filename)
@@ -127,6 +138,7 @@ class DuelingDQNAgent():
         except:
             print("second saving failed")
 
+    # load the network given in filename into the policy net
     def load_network(self, filename):
         print("loading network")
         self.policy_net.load_state_dict(torch.load(filename))
