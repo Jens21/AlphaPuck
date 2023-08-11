@@ -25,4 +25,4 @@ def evaluate_single_checkpoint(checkpoint_path):
                                                                     100 * n_lost / n_games))
 
 if __name__ == '__main__':
-    evaluate_single_checkpoint("muzero_final.pth")
+    evaluate_single_checkpoint("muzero.pth")

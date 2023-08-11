@@ -1,10 +1,3 @@
-# elif player == "Jens_final_fix_multi_proc_2":
-# return EfficientZero_Jens_Final_Fix_Multi_Proc_2(
-#     'agents/agent_final_fix_multi_proc.pth')  # Winning percentage: 6.5%  ################### Best agent in total, but bad vs strong
-# elif player == "test_v1":
-# return EfficientZero_Jens_Final_Single_Proc_2(
-#     'agents/agent_1062500.pth')  # Winning percentage: # Winning percentage: 2.0%
-
 import os
 import sys
 
@@ -17,8 +10,7 @@ from laserhockey.hockey_env import BasicOpponent
 from client.remoteControllerInterface import RemoteControllerInterface
 from client.backend.client import Client
 
-from network_fabrice import EfficientZero_Jens_Final_Single_Proc_2
-from network_best import EfficientZero_Jens_Final_Fix_Multi_Proc_2
+from network import MuZero
 
 class RemoteBasicOpponent(RemoteControllerInterface):
     def __init__(self, weak, keep_mode=True):
@@ -36,23 +28,7 @@ class RemoteBasicOpponent(RemoteControllerInterface):
         return action
 
     def before_game_starts(self) -> None:
-        if os.path.exists('client/network_version.txt'):
-            with open('client/network_version.txt', 'r') as f:
-                content = f.read()
-
-            content = "network_v10"
-
-            if content == 'network_fabrice':
-                self.net = EfficientZero_Jens_Final_Single_Proc_2('client/agent_1062500.pth')
-                print('loaded network_fabrice')
-            elif content == 'network_v10': # network_best best v10
-                self.net = EfficientZero_Jens_Final_Fix_Multi_Proc_2('client/agent_1025000.pth')
-                print('network_best best v10')
-            else: # network_best
-                self.net = EfficientZero_Jens_Final_Fix_Multi_Proc_2('client/agent_final_fix_multi_proc.pth')
-                print('loaded network_best')
-        else:
-            print("Can't load the network_version file")
+        self.net = MuZero('muzero.pth')
 
 if __name__ == '__main__':
     controller = RemoteBasicOpponent(weak=False)

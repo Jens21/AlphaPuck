@@ -316,7 +316,7 @@ class Network(th.nn.Module):
 
 
 
-class EfficientZero_Jens_Final_Fix_Multi_Proc_2():
+class MuZero():
     def __init__(self, model_path) -> None:
         self.model = Network().eval()
         self.model.load_state_dict(th.load(model_path))
