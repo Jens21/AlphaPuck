@@ -83,6 +83,15 @@ Fixes random number generator seed to produce deterministic results.
 
 Disables graphical rendering.
 
+---
+
+For example, to evaluate MuZero against DecQN for 10 games without graphical rendering, run the command
+
+
+```bash
+python main.py --player-1 MuZero --player-2 DecQN --num-episodes 10 --disable-rendering
+```
+
 For more details, invoke the script with the flag `-h`/`--help`.
 
 
