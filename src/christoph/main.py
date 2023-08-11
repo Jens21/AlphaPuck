@@ -7,6 +7,8 @@ import time
 import tensorboard
 from torch.utils.tensorboard import SummaryWriter
 
+from torchinfo import summary
+
 import laserhockey.hockey_env as h_env
 
 from actions import ACTIONS
@@ -290,6 +292,8 @@ if __name__=='__main__':
         
         agent.load_network(model_filename)
         print("Playing against weak opponent:")
-        test(env=env, agent=agent, test_episodes=1000, weak=difficulty_weak)
+        #test(env=env, agent=agent, test_episodes=1000, weak=difficulty_weak)
         print("Playing against strong opponent:")
-        test(env=env, agent=agent, test_episodes=1000, weak=False)
+        #test(env=env, agent=agent, test_episodes=1000, weak=False)
+
+        summary(agent.policy_net)
