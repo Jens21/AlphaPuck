@@ -59,6 +59,7 @@ src/
 
 The Python script `src/evaluation/main.py` is used to evaluate RL agents against each other or against the two basic opponents Weak and Strong.
 It implements a command line interface that allows quick configuration for evaluations.
+**Important:** It must be run inside the directory `src/evaluation/`.
 
 In the following, we present the most important arguments:
 
