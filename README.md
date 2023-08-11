@@ -3,6 +3,7 @@
 ![Python](https://img.shields.io/badge/python-3.10-blue.svg)
 ![Licence](https://img.shields.io/github/license/Jens21/AlphaPuck)
 
+
 <p align="center">
   <img width="300" height="240" src="game_screenshot.png">
 </p>
