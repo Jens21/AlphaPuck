@@ -5,8 +5,9 @@ import laserhockey.hockey_env as h_env
 import numpy as np
 import torch
 from agents.agent import Agent
+from agents.dddqn_christoph import DDDQN_Christoph
 from agents.decqn_fabrice import DecQN_Fabrice
-from agents.dueling_jens import Dueling_Jens
+from agents.muzero_jens import MuZero_Jens
 from tqdm import trange
 
 
@@ -15,23 +16,21 @@ def get_agent_from_player(player: str) -> Agent | h_env.BasicOpponent:
     Returns agent, given a player.
 
     Args:
-        player (str): Player (Jens, Fabrice, Christoph, Weak, Strong).
+        player (str): Player (MuZero, DecQN, DDDQN, Weak, Strong).
 
     Raises:
-        NotImplementedError: Christoph needs to add his agent.
         ValueError: Unknown player.
 
     Returns:
         Agent | h_env.BasicOpponent: Player's agent.
     """
 
-    if player == "Jens":
-        return Dueling_Jens()
-    elif player == "Fabrice":
+    if player == "MuZero":
+        return MuZero_Jens()
+    elif player == "DecQN":
         return DecQN_Fabrice()
-    elif player == "Christoph":
-        # TODO
-        raise NotImplementedError
+    elif player == "DDDQN":
+        return DDDQN_Christoph()
     elif player == "Weak":
         return h_env.BasicOpponent(weak=True)
     elif player == "Strong":
@@ -49,13 +48,13 @@ def main() -> None:
         "--player-1",
         type=str,
         required=True,
-        help="Name of player 1: Jens, Fabrice, Christoph, Weak, Strong.",
+        help="Name of player 1: MuZero, DecQN, DDDQN, Weak, Strong.",
     )
     main_parser.add_argument(
         "--player-2",
         type=str,
         required=True,
-        help="Name of player 1: Jens, Fabrice, Christoph, Weak, Strong.",
+        help="Name of player 1: MuZero, DecQN, DDDQN, Weak, Strong.",
     )
     main_parser.add_argument(
         "--num-episodes",
